@@ -6,17 +6,17 @@ from threading import Thread
 import requests
 from flask import Flask, request, jsonify
 
-import firebase_admin
-from firebase_admin import credentials, firestore, storage
+# import firebase_admin
+# from firebase_admin import credentials, firestore, storage
 
-# Initialize Firebase
-cred = credentials.Certificate("path/to/your/firebase-adminsdk.json")
-firebase_admin.initialize_app(cred, {
-    'storageBucket': 'your-project-id.appspot.com'
-})
+# # Initialize Firebase
+# cred = credentials.Certificate("path/to/your/firebase-adminsdk.json")
+# firebase_admin.initialize_app(cred, {
+#     'storageBucket': 'your-project-id.appspot.com'
+# })
 
-db = firestore.client()
-bucket = storage.bucket()
+# db = firestore.client()
+# bucket = storage.bucket()
 
 
 #######################################################
@@ -63,7 +63,7 @@ def create_main_window():
 def charge_phone_window():
     layout = [
         [sg.Text('Enter Your FingerPrint Here', font=('Helvetica', 20), justification='center', size=(30, 1))],
-        [sg.Image('images.png',size=(200,200))],
+        [sg.Image('images.png',size=(200,200),enable_events=True,key='-IMAGE-')],
         [sg.Text('PLACEHOLDER', key='status_key', justification='center', size=(30, 1))]
     ]
     return sg.Window('Enter Your FingerPrint Here', layout, element_justification='center')
@@ -83,15 +83,15 @@ def face_image_capture_window():
 
 
 # Function to capture a picture from ESP32 camera module
-def capture_image_from_esp32(image_path):
-    esp32_camera_url = "http://<ESP32_CAMERA_IP>/capture"
-    response = requests.get(esp32_camera_url, stream=True)
-    if response.status_code == 200:
-        with open(image_path, 'wb') as file:
-            for chunk in response.iter_content(chunk_size=8192):
-                file.write(chunk)
-        return True
-    return False
+# def capture_image_from_esp32(image_path):
+#     esp32_camera_url = "http://<ESP32_CAMERA_IP>/capture"
+#     response = requests.get(esp32_camera_url, stream=True)
+#     if response.status_code == 200:
+#         with open(image_path, 'wb') as file:
+#             for chunk in response.iter_content(chunk_size=8192):
+#                 file.write(chunk)
+#         return True
+#     return False
 
 
 
@@ -190,15 +190,15 @@ def unlock_locker(locker_id):
     GPIO.output(solenoid_pins[locker_id], GPIO.LOW)
 
 # Function to store fingerprint ID and picture in Firebase
-def store_user_data(fingerprint_id, image_path):
-    # Store fingerprint ID in Firestore
-    db.collection('users').document(fingerprint_id).set({
-        'fingerprint_id': fingerprint_id
-    })
+# def store_user_data(fingerprint_id, image_path):
+#     # Store fingerprint ID in Firestore
+#     db.collection('users').document(fingerprint_id).set({
+#         'fingerprint_id': fingerprint_id
+#     })
 
-    # Upload the image to Firebase Storage
-    blob = bucket.blob(f'images/{fingerprint_id}.jpg')
-    blob.upload_from_filename(image_path)
+#     # Upload the image to Firebase Storage
+#     blob = bucket.blob(f'images/{fingerprint_id}.jpg')
+#     blob.upload_from_filename(image_path)
 
 def main():
     # Initialize fingerprint sensor
@@ -208,9 +208,9 @@ def main():
     #
     
     # Start Flask server in a separate thread
-    flask_thread = Thread(target=run_flask)
-    flask_thread.daemon = True
-    flask_thread.start()
+    # flask_thread = Thread(target=run_flask)
+    # flask_thread.daemon = True
+    # flask_thread.start()
     #
     
     window = create_main_window()
@@ -220,61 +220,60 @@ def main():
             break
 
         elif event == "charge_phone":
-            charge_phone_window = charge_phone_window()
+            charge_window = charge_phone_window()
             while True:
-                event, values = charge_phone_window.read()
+                event, values = charge_window.read()
                 if event == sg.WIN_CLOSED:
                     break
 
                 # Check for available container using IR sensors
-                available_container = None
-                for idx, pin in enumerate(ir_sensor_pins):
-                    if GPIO.input(pin) == GPIO.LOW:  # Assuming LOW means container is empty
-                        available_container = idx
-                        break
+                if event == '-IMAGE-':
+                    available_container = None
+                    for idx, pin in enumerate(ir_sensor_pins):
+                        if GPIO.input(pin) == GPIO.LOW:  # Assuming LOW means container is empty
+                            available_container = idx
+                            break
 
-                #write code for if no available box
-                id = available_container + 1
+                    #write code for if no available box
+                    id = available_container + 1
 
-                #fingerprint enrollment
-                charge_phone_window['status_text'].update('Please place your finger...')
-                #charge_phone_window['instruction_image'].update(filename=readingf_image) 
-                enroll_fingerprint_value = enroll_fingerprint(f, id, charge_phone_window, 'status_text')
+                    #fingerprint enrollment
+                    charge_window['status_text'].update('Please place your finger...')
+                    #charge_phone_window['instruction_image'].update(filename=readingf_image) 
+                    enroll_fingerprint_value = enroll_fingerprint(f, id, charge_phone_window, 'status_text')
 
-                if not enroll_fingerprint_value: 
-                    charge_phone_window['status_text'].update('Fingerprint enrollment failed. Try again.')
-                    #back to fingerprint enrollment 
+                    #create method to do if enroll fingerprint fail 
 
-                      
+                        
 
-                face_image_capture = face_image_capture_window() #need to create
-                while True:
-                    event, values = face_image_capture.read()
-                    if event == sg.WIN_CLOSED:
-                        break
+                    face_image_capture = face_image_capture_window() #need to create
+                    while True:
+                        event, values = face_image_capture.read()
+                        if event == sg.WIN_CLOSED:
+                            break
 
-                    if fingerprint_id:  # Take image through ESP32 camera module
-                        image_path = f'/tmp/{fingerprint_id}.jpg'
-                        if capture_image_from_esp32(image_path):
-                            store_user_data(fingerprint_id, image_path)
+                        # if fingerprint_id:  # Take image through ESP32 camera module
+                        #     image_path = f'/tmp/{fingerprint_id}.jpg'
+                        #     if capture_image_from_esp32(image_path):
+                        #         store_user_data(fingerprint_id, image_path)
 
-                    else:
-                        sg.popup("Failed to capture image from ESP32 camera.")
-                        #back to the face image capture
+                        else:
+                            sg.popup("Failed to capture image from ESP32 camera.")
+                            #back to the face image capture
 
 
-                    if available_container is not None:
+                        if available_container is not None:
 
-                        # Open the available container
-                        GPIO.output(solenoid_pins[available_container], GPIO.HIGH)
-                        time.sleep(1)  # Keep the solenoid lock open for 1 second
-                        GPIO.output(solenoid_pins[available_container], GPIO.LOW)
-                        sg.popup("Phone is now charging.")
-                    else:
-                        sg.popup("No available container.")
-                face_image_capture.close()
+                            # Open the available container
+                            GPIO.output(solenoid_pins[available_container], GPIO.HIGH)
+                            time.sleep(1)  # Keep the solenoid lock open for 1 second
+                            GPIO.output(solenoid_pins[available_container], GPIO.LOW)
+                            sg.popup("Phone is now charging.")
+                        else:
+                            sg.popup("No available container.")
+                    face_image_capture.close()
 
-            charge_phone_window.close()
+            charge_window.close()
 
                 
         elif event == "unlock_container":
@@ -301,14 +300,14 @@ def main():
 
 
                 #all code for removing fingerprint sensor record in firebase
-                if fingerprint_id: # Check fingerprint ID in Firebase
+                # if fingerprint_id: # Check fingerprint ID in Firebase
                     
-                    user_doc = db.collection('users').document(fingerprint_id).get()
-                    if user_doc.exists:
-                        # Open corresponding container
-                        sg.popup("Container unlocked. Have a nice day.")
-                    else:
-                        sg.popup("Fingerprint does not match.")
+                #     user_doc = db.collection('users').document(fingerprint_id).get()
+                #     if user_doc.exists:
+                #         # Open corresponding container
+                #         sg.popup("Container unlocked. Have a nice day.")
+                #     else:
+                #         sg.popup("Fingerprint does not match.")
             unlock_container_window.close()
 
     window.close()
