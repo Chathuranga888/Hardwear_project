@@ -6,17 +6,17 @@ from threading import Thread
 import requests
 from flask import Flask, request, jsonify
 
-import firebase_admin
-from firebase_admin import credentials, firestore, storage
+# import firebase_admin
+# from firebase_admin import credentials, firestore, storage
 
-# Initialize Firebase
-cred = credentials.Certificate("path/to/your/firebase-adminsdk.json")
-firebase_admin.initialize_app(cred, {
-    'storageBucket': 'your-project-id.appspot.com'
-})
+# # Initialize Firebase
+# cred = credentials.Certificate("path/to/your/firebase-adminsdk.json")
+# firebase_admin.initialize_app(cred, {
+#     'storageBucket': 'your-project-id.appspot.com'
+# })
 
-db = firestore.client()
-bucket = storage.bucket()
+# db = firestore.client()
+# bucket = storage.bucket()
 
 
 #######################################################
@@ -83,15 +83,15 @@ def face_image_capture_window():
 
 
 # Function to capture a picture from ESP32 camera module
-def capture_image_from_esp32(image_path):
-    esp32_camera_url = "http://<ESP32_CAMERA_IP>/capture"
-    response = requests.get(esp32_camera_url, stream=True)
-    if response.status_code == 200:
-        with open(image_path, 'wb') as file:
-            for chunk in response.iter_content(chunk_size=8192):
-                file.write(chunk)
-        return True
-    return False
+# def capture_image_from_esp32(image_path):
+#     esp32_camera_url = "http://<ESP32_CAMERA_IP>/capture"
+#     response = requests.get(esp32_camera_url, stream=True)
+#     if response.status_code == 200:
+#         with open(image_path, 'wb') as file:
+#             for chunk in response.iter_content(chunk_size=8192):
+#                 file.write(chunk)
+#         return True
+#     return False
 
 
 
@@ -190,15 +190,15 @@ def unlock_locker(locker_id):
     GPIO.output(solenoid_pins[locker_id], GPIO.LOW)
 
 # Function to store fingerprint ID and picture in Firebase
-def store_user_data(fingerprint_id, image_path):
-    # Store fingerprint ID in Firestore
-    db.collection('users').document(fingerprint_id).set({
-        'fingerprint_id': fingerprint_id
-    })
+# def store_user_data(fingerprint_id, image_path):
+#     # Store fingerprint ID in Firestore
+#     db.collection('users').document(fingerprint_id).set({
+#         'fingerprint_id': fingerprint_id
+#     })
 
-    # Upload the image to Firebase Storage
-    blob = bucket.blob(f'images/{fingerprint_id}.jpg')
-    blob.upload_from_filename(image_path)
+#     # Upload the image to Firebase Storage
+#     blob = bucket.blob(f'images/{fingerprint_id}.jpg')
+#     blob.upload_from_filename(image_path)
 
 def main():
     # Initialize fingerprint sensor
@@ -253,10 +253,10 @@ def main():
                     if event == sg.WIN_CLOSED:
                         break
 
-                    if fingerprint_id:  # Take image through ESP32 camera module
-                        image_path = f'/tmp/{fingerprint_id}.jpg'
-                        if capture_image_from_esp32(image_path):
-                            store_user_data(fingerprint_id, image_path)
+                    # if fingerprint_id:  # Take image through ESP32 camera module
+                    #     image_path = f'/tmp/{fingerprint_id}.jpg'
+                        # if capture_image_from_esp32(image_path):
+                        #     store_user_data(fingerprint_id, image_path)
 
                     else:
                         sg.popup("Failed to capture image from ESP32 camera.")
@@ -301,14 +301,14 @@ def main():
 
 
                 #all code for removing fingerprint sensor record in firebase
-                if fingerprint_id: # Check fingerprint ID in Firebase
+                # if fingerprint_id: # Check fingerprint ID in Firebase
                     
-                    user_doc = db.collection('users').document(fingerprint_id).get()
-                    if user_doc.exists:
-                        # Open corresponding container
-                        sg.popup("Container unlocked. Have a nice day.")
-                    else:
-                        sg.popup("Fingerprint does not match.")
+                #     user_doc = db.collection('users').document(fingerprint_id).get()
+                #     if user_doc.exists:
+                #         # Open corresponding container
+                #         sg.popup("Container unlocked. Have a nice day.")
+                #     else:
+                #         sg.popup("Fingerprint does not match.")
             unlock_container_window.close()
 
     window.close()
