@@ -54,24 +54,27 @@ def initialize_sensor():
 # Function to initialize GUI
 def create_main_window():
     layout = [
-        [sg.Text('Smart Charging System', size=(200, 2), font=('Helvetica', 15), justification='center')],
-        [sg.Button("Charge Phone", key="charge_phone",size=(15, 3))],
-        [sg.Button("Unlock Container", key="unlock_container",size=(15, 3))]
-    ]
-    return sg.Window("Phone Charging and Locking System", layout)
+    [sg.Text('Smart Charging System', size=(30, 1), font=('Helvetica', 20), justification='center')],
+    [sg.Button("Charge Phone", key="charge_phone", size=(20, 4)), sg.Button("Unlock Container", key="unlock_container", size=(20, 4))]
+             ]
+    return sg.Window('Smart Charging System', layout, element_justification='center')
 
 # Function to create charge phone window
 def charge_phone_window():
     layout = [
-        [sg.Text('Enter Your FingerPrint', font=('Helvetica', 15), justification='center', size=(200, 2))],
-        [sg.Text('TEXT GOES HERE',key='-PLACEHOLDER_1-')]
-        #continue
-
+        [sg.Text('Enter Your FingerPrint Here', font=('Helvetica', 20), justification='center', size=(30, 1))],
+        [sg.Image('images.png',size=(200,200))],
+        [sg.Text('PLACEHOLDER', key='status_key', justification='center', size=(30, 1))]
     ]
+    return sg.Window('Enter Your FingerPrint Here', layout, element_justification='center')
 
 # Function to create unlock container window
 def unlock_container_window():
-    pass
+        layout = [
+        [sg.Text('Place Your Fingerprint', font=('Helvetica', 15), justification='center', size=(200, 2))],
+        [sg.Text('TEXT GOES HERE',key='status_key')]
+        ]
+        #continue
 
 # Function to create face image capture
 def face_image_capture_window():
@@ -93,9 +96,98 @@ def capture_image_from_esp32(image_path):
 
 
 # Function to handle fingerprint sensor interaction
-def enroll_fingerprint():
+
+# Function to capture fingerprint
+def capture_fingerprint(f, window, status_key):
+    try:
+        print('Waiting for finger placement...')
+        window[status_key].update('Waiting for finger placement...')
+        while not f.readImage():
+            pass
+
+        print('Converting image...')
+        window[status_key].update('Converting image...')
+        f.convertImage(0x01)
+
+        result = f.searchTemplate()
+        position = result[0]
+        if position >= 0:
+            print('Fingerprint already exists at position #', position)
+            window[status_key].update(f'Fingerprint already exists at position # {position}')
+            return True
+
+        return True
+    except Exception as e:
+        print('Error during fingerprint capture:', e)
+        window[status_key].update(f'Error during fingerprint capture: {e}')
+        return False
+
+def enroll_fingerprint(f, id, window, status_key):
     # Add code to interact with fingerprint sensor
-    pass
+    if not capture_fingerprint(f, window, status_key):
+        return False
+
+    print('Remove finger...')
+    #window['instruction_image'].update(filename=getoutf_image)
+    window[status_key].update('Remove finger...')
+    time.sleep(1)
+
+    print('Place same finger again...')
+    #window['instruction_image'].update(filename=readingf_image)
+    window[status_key].update('Place same finger again...')
+    while not f.readImage():
+        pass
+
+    print('Converting image...')
+    window[status_key].update('Converting image...')
+    f.convertImage(0x02)
+
+    print('Creating fingerprint model...')
+    window[status_key].update('Creating fingerprint model...')
+    if f.createTemplate():
+        print('Storing fingerprint model...')
+        window[status_key].update('Storing fingerprint model...')
+        position = f.storeTemplate(id)
+        print(f'Fingerprint enrolled successfully with ID #{id} at position #{position}')
+        window[status_key].update(f'Fingerprint enrolled successfully with ID #{id} at position #{position}')
+        return True
+    else:
+        print('Failed to create fingerprint model')
+        #window['instruction_image'].update(filename=enrollf_error_image)
+        window[status_key].update('Failed to create fingerprint model')
+        return False
+    
+# Function to delete fingerprint
+def delete_fingerprint(f, id, window, status_key):
+    try:
+        #sg.popup('Tring to delete', image=enrollf_error_image)
+        if f.deleteTemplate(id):
+            print(f'Fingerprint with ID #{id} deleted successfully!')
+            window[status_key].update(f'Fingerprint with ID #{id} deleted successfully!')
+            return True
+        else:
+            #sg.popup('Failed to delete fingerprint!', image=enrollf_error_image)
+            print('Failed to delete fingerprint!')
+            window[status_key].update('Failed to delete fingerprint!')
+            return False
+    except Exception as e:
+        #sg.popup(f'Error deleting fingerprint: {e}', image=enrollf_error_image)
+        print(f'Error deleting fingerprint: {e}')
+        window[status_key].update(f'Error deleting fingerprint: {e}')
+        return False
+    
+
+# Function to lock a specific locker
+def lock_locker(locker_id):
+    GPIO.output(solenoid_pins[locker_id], GPIO.HIGH)
+    time.sleep(1)
+    GPIO.output(solenoid_pins[locker_id], GPIO.LOW)
+
+# Function to unlock a specific locker
+def unlock_locker(locker_id):
+    GPIO.output(solenoid_pins[locker_id], GPIO.HIGH)
+    time.sleep(1)
+    GPIO.output(solenoid_pins[locker_id], GPIO.LOW)
 
 # Function to store fingerprint ID and picture in Firebase
 def store_user_data(fingerprint_id, image_path):
@@ -128,43 +220,60 @@ def main():
             break
 
         elif event == "charge_phone":
-            charge_phone_window = charge_phone_window() #need to create
+            charge_phone_window = charge_phone_window()
             while True:
                 event, values = charge_phone_window.read()
                 if event == sg.WIN_CLOSED:
                     break
 
-                fingerprint_id = enroll_fingerprint()  #fingerprint enrollment
+                # Check for available container using IR sensors
+                available_container = None
+                for idx, pin in enumerate(ir_sensor_pins):
+                    if GPIO.input(pin) == GPIO.LOW:  # Assuming LOW means container is empty
+                        available_container = idx
+                        break
+
+                #write code for if no available box
+                id = available_container + 1
+
+                #fingerprint enrollment
+                charge_phone_window['status_text'].update('Please place your finger...')
+                #charge_phone_window['instruction_image'].update(filename=readingf_image) 
+                enroll_fingerprint_value = enroll_fingerprint(f, id, charge_phone_window, 'status_text')
+
+                if not enroll_fingerprint_value: 
+                    charge_phone_window['status_text'].update('Fingerprint enrollment failed. Try again.')
+                    #back to fingerprint enrollment 
+
+                      
 
                 face_image_capture = face_image_capture_window() #need to create
                 while True:
                     event, values = face_image_capture.read()
                     if event == sg.WIN_CLOSED:
                         break
+
                     if fingerprint_id:  # Take image through ESP32 camera module
                         image_path = f'/tmp/{fingerprint_id}.jpg'
                         if capture_image_from_esp32(image_path):
                             store_user_data(fingerprint_id, image_path)
 
-                            # Check for available container using IR sensors
-                            available_container = None
-                            for idx, pin in enumerate(ir_sensor_pins):
-                                if GPIO.input(pin) == GPIO.LOW:  # Assuming LOW means container is empty
-                                    available_container = idx
-                                    break
-
-
-                        if available_container is not None:
-
-                            # Open the available container
-                            GPIO.output(solenoid_pins[available_container], GPIO.HIGH)
-                            time.sleep(1)  # Keep the solenoid lock open for 1 second
-                            GPIO.output(solenoid_pins[available_container], GPIO.LOW)
-                            sg.popup("Phone is now charging.")
-                        else:
-                            sg.popup("No available container.")
                     else:
                         sg.popup("Failed to capture image from ESP32 camera.")
+                        #back to the face image capture
+
+
+                    if available_container is not None:
+
+                        # Open the available container
+                        GPIO.output(solenoid_pins[available_container], GPIO.HIGH)
+                        time.sleep(1)  # Keep the solenoid lock open for 1 second
+                        GPIO.output(solenoid_pins[available_container], GPIO.LOW)
+                        sg.popup("Phone is now charging.")
+                    else:
+                        sg.popup("No available container.")
+                face_image_capture.close()
+
             charge_phone_window.close()
 
                 
@@ -174,8 +283,22 @@ def main():
                 event, values = unlock_container_window.read()
                 if event == sg.WIN_CLOSED:
                     break
+                
+                unlock_container_window['status_text'].update('Please place your finger...')
+                #unlock_container_window['instruction_image'].update(filename=readingf_image)['instruction_image'].update(filename=readingf_image)
+                
+                if capture_fingerprint(f,unlock_container_window,'status_text'):
+                     #all the code for fingerprint
+                     result = f.searchTemplate()
+                     position = result[0]
 
-                fingerprint_id = get_fingerprint() #all the code for fingerprint
+
+                     unlock_locker(position)
+                     delete_fingerprint(f, position,unlock_container_window, 'status_text')
+
+
+
+
 
                 #all code for removing fingerprint sensor record in firebase
                 if fingerprint_id: # Check fingerprint ID in Firebase
