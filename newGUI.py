@@ -8,7 +8,13 @@ from flask import Flask, request, jsonify
 from picamera import PiCamera
 import io
 from PIL import Image
-import pyrebase
+#import firebase_admin
+
+#Imamges
+enrollf_error_image = '/home/sdam/hw_project/images/enrollf_error_image.png'
+readingf_image = '/home/sdam/hw_project/images/readingf_image.png'
+getoutf_image = '/home/sdam/hw_project/images/getoutf_image.png'
+
 
 # import firebase_admin
 # from firebase_admin import credentials, firestore, storage
@@ -47,11 +53,11 @@ solenoid_pins = [17, 27, 22, 23]  # GPIO pins for 4 solenoid locks
 ir_sensor_pins = [6, 13, 19, 26] # GPIO pins for the IR sensors
 
 # Set solenoid pins as output and IR sensor pins as input
-for pin in solenoid_pins:
-    GPIO.setup(pin, GPIO.OUT)
+# for pin in solenoid_pins:
+#     GPIO.setup(pin, GPIO.OUT)
 
-for pin in ir_sensor_pins:
-    GPIO.setup(pin, GPIO.IN)
+# for pin in ir_sensor_pins:
+#     GPIO.setup(pin, GPIO.IN)
 
 
 def initialize_sensor():
@@ -75,7 +81,7 @@ camera.resolution = (320, 240)
 def create_main_window():
     layout = [
     [sg.Text('Smart Charging System', size=(30, 1), font=('Helvetica', 20), justification='center')],
-    [sg.Button("Charge Phone", key="charge_phone", size=(20, 4)), sg.Button("Unlock Container", key="unlock_container", size=(20, 4))]
+    [sg.Button("Charge Phone", key="charge_phone", size=(20, 4),expand_x=True,expand_y=True), sg.Button("Unlock Container", key="unlock_container", size=(20, 4),expand_x=True,expand_y=True)]
              ]
     return sg.Window('Smart Charging System', layout, element_justification='center',size=(800, 400), finalize=True)
 
@@ -83,8 +89,8 @@ def create_main_window():
 def charge_phone_window():
     layout = [
         [sg.Text('Enter Your FingerPrint Here', font=('Helvetica', 20), justification='center', size=(30, 1))],
-        [sg.Image('/home/sdams/Documents/gui/image/enrollf_error_image.png',size=(200,200),enable_events=True,key='-IMAGE-')],
-        [sg.Text('PLACEHOLDER', key='status_key234567', justification='center', size=(30, 1))]
+        [sg.Image(readingf_image,size=(200,200),enable_events=True,key='image')],
+        [sg.Text('PLACEHOLDER', key='status_text', justification='center', size=(30, 1))]
     ]
     return sg.Window('Enter Your FingerPrint Here', layout, element_justification='center',size=(800, 400), finalize=True)
 
@@ -101,7 +107,7 @@ def unlock_container_window():
 def face_image_capture_window():
     layout = [
     [sg.Text('Capture Your Face Image', font=('Helvetica', 15), justification='center', size=(200, 2))],
-    [sg.Image(filename='', key='-IMAGE-')],
+    [sg.Image(filename='', key='image')],
     [sg.Button('Take Photo', key='-TAKE_PHOTO-')]
             ]
     return sg.Window('Capture Your Face Image',layout,element_justification='center',size=(800, 400), finalize=True)
@@ -270,20 +276,20 @@ def main():
                     break
 
                 # Check for available container using IR sensors
-                if event == '-IMAGE-':
-                    available_container = None
-                    for idx, pin in enumerate(ir_sensor_pins):
-                        if GPIO.input(pin) == GPIO.LOW:  # Assuming LOW means container is empty
-                            available_container = idx
-                            break
+                if event == 'image':
+                    available_container = 0
+                    # for idx, pin in enumerate(ir_sensor_pins):
+                    #     if GPIO.input(pin) == GPIO.LOW:  # Assuming LOW means container is empty
+                    #         available_container = idx
+                    #         break
 
                     #write code for if no available box
                     id = available_container + 1
 
                     #fingerprint enrollment
                     charge_window['status_text'].update('Please place your finger...')
-                    #charge_phone_window['instruction_image'].update(filename=readingf_image) 
-                    enroll_fingerprint_value = enroll_fingerprint(f, id, charge_phone_window, 'status_text')
+                    charge_window['image'].update(filename=readingf_image) 
+                    enroll_fingerprint_value = enroll_fingerprint(f, id, charge_window, 'status_text')
 
                     #create method to do if enroll fingerprint fail
                     if enroll_fingerprint_value == 1:
@@ -321,13 +327,13 @@ def main():
                 #     #back to the face image capture
 
                 # Get the current frame from the camera
-                image = get_image_from_camera(camera)
+                # image = get_image_from_camera(camera)
 
                 # Update the image in the PySimpleGUI window
-                bio = io.BytesIO()
-                image.save(bio, format='PNG')
-                window['-IMAGE-'].update(data=bio.getvalue())
-                camera.close()
+                # bio = io.BytesIO()
+                # image.save(bio, format='PNG')
+                # window['-IMAGE-'].update(data=bio.getvalue())
+                # camera.close()
 
 
 
