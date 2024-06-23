@@ -23,19 +23,19 @@ import pyrebase
 # bucket = storage.bucket()
 
 # Firebase configuration
-firebaseConfig = {
-    "apiKey": "AIzaSyC4O_SqJ6xh_aZUzxs5YEx-Fg54qwh6hZQ",
-    "authDomain": "hardware-project-288b1.firebaseapp.com",
-    "databaseURL": "https://console.firebase.google.com/project/hardware-project-288b1/firestore/databases/-default-/data/~2F",
-    "projectId": "hardware-project-288b1",
-    "storageBucket": "hardware-project-288b1.appspot.com",
-    "messagingSenderId": "877734039049",
-    "appId": "1:877734039049:web:80a5aab2cd253bef3832d8"
-}
+# firebaseConfig = {
+#     "apiKey": "AIzaSyC4O_SqJ6xh_aZUzxs5YEx-Fg54qwh6hZQ",
+#     "authDomain": "hardware-project-288b1.firebaseapp.com",
+#     "databaseURL": "https://console.firebase.google.com/project/hardware-project-288b1/firestore/databases/-default-/data/~2F",
+#     "projectId": "hardware-project-288b1",
+#     "storageBucket": "hardware-project-288b1.appspot.com",
+#     "messagingSenderId": "877734039049",
+#     "appId": "1:877734039049:web:80a5aab2cd253bef3832d8"
+# }
 #database url not sure
 
-firebase = pyrebase.initialize_app(firebaseConfig)
-storage = firebase.storage()
+# firebase = pyrebase.initialize_app(firebaseConfig)
+# storage = firebase.storage()
 
 # Fingerprint sensor setup
 sensor_path = '/dev/ttyS0'
@@ -77,7 +77,7 @@ def create_main_window():
     [sg.Text('Smart Charging System', size=(30, 1), font=('Helvetica', 20), justification='center')],
     [sg.Button("Charge Phone", key="charge_phone", size=(20, 4)), sg.Button("Unlock Container", key="unlock_container", size=(20, 4))]
              ]
-    return sg.Window('Smart Charging System', layout, element_justification='center')
+    return sg.Window('Smart Charging System', layout, element_justification='center',size=(800, 400), finalize=True)
 
 # Function to create charge phone window
 def charge_phone_window():
@@ -86,7 +86,7 @@ def charge_phone_window():
         [sg.Image('/home/sdams/Documents/gui/image/enrollf_error_image.png',size=(200,200),enable_events=True,key='-IMAGE-')],
         [sg.Text('PLACEHOLDER', key='status_key234567', justification='center', size=(30, 1))]
     ]
-    return sg.Window('Enter Your FingerPrint Here', layout, element_justification='center')
+    return sg.Window('Enter Your FingerPrint Here', layout, element_justification='center',size=(800, 400), finalize=True)
 
 # Function to create unlock container window
 def unlock_container_window():
@@ -95,7 +95,7 @@ def unlock_container_window():
         [sg.Button('Place Finger',key='-PLACE_FINGER-',size=(20, 4))],
         [sg.Text('TEXT GOES HERE',key='status_key')]
         ]
-        return sg.Window('Place Your Fingerprint',layout,element_justification='center')
+        return sg.Window('Place Your Fingerprint',layout,element_justification='center',size=(800, 400), finalize=True)
 
 # Function to create face image capture
 def face_image_capture_window():
@@ -104,7 +104,7 @@ def face_image_capture_window():
     [sg.Image(filename='', key='-IMAGE-')],
     [sg.Button('Take Photo', key='-TAKE_PHOTO-')]
             ]
-    return sg.Window('Capture Your Face Image',layout,element_justification='center')
+    return sg.Window('Capture Your Face Image',layout,element_justification='center',size=(800, 400), finalize=True)
 
 # Function to get the image from the camera
 def get_image_from_camera(camera):
@@ -114,11 +114,11 @@ def get_image_from_camera(camera):
     return Image.open(stream)
 
 # Function to upload image to Firebase
-def upload_image_to_firebase(image):
-    bio = io.BytesIO()
-    image.save(bio, format='PNG')
-    bio.seek(0)
-    storage.child("images/image.png").put(bio)
+# def upload_image_to_firebase(image):
+#     bio = io.BytesIO()
+#     image.save(bio, format='PNG')
+#     bio.seek(0)
+#     storage.child("images/image.png").put(bio)
 
 # function to take image from user
 def capture_photo(output_file):
@@ -313,7 +313,7 @@ def main():
                     # Get the current frame from the camera
                     image = get_image_from_camera(camera)
                     # Upload the image to Firebase
-                    upload_image_to_firebase(image)
+                    # upload_image_to_firebase(image)
                     sg.popup('Photo taken and uploaded to Firebase!')
 
                 # else:
