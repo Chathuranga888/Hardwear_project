@@ -64,8 +64,8 @@ def create_main_window():
 def charge_phone_window():
     layout = [
         [sg.Text('Enter Your FingerPrint Here', font=('Helvetica', 20), justification='center', size=(30, 1))],
-        [sg.Image('images.png',size=(200,200),enable_events=True,key='-IMAGE-')],
-        [sg.Text('PLACEHOLDER', key='status_key', justification='center', size=(30, 1))]
+        [sg.Image('/home/sdams/Documents/gui/image/enrollf_error_image.png',size=(200,200),enable_events=True,key='-IMAGE-')],
+        [sg.Text('PLACEHOLDER', key='status_key234567', justification='center', size=(30, 1))]
     ]
     return sg.Window('Enter Your FingerPrint Here', layout, element_justification='center')
 
@@ -249,8 +249,9 @@ def main():
 
                     #fingerprint enrollment
                     charge_window['status_text'].update('Please place your finger...')
+                    charge_window.refresh()
                     #charge_phone_window['instruction_image'].update(filename=readingf_image) 
-                    enroll_fingerprint_value = enroll_fingerprint(f, id, charge_phone_window, 'status_text')
+                    enroll_fingerprint_value = enroll_fingerprint(f, id, charge_window, 'status_text')
 
                     #create method to do if enroll fingerprint fail
                     if enroll_fingerprint_value == 1:

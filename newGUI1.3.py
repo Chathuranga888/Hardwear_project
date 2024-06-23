@@ -1,5 +1,7 @@
 import PySimpleGUI as sg
+# import RPi.GPIO as GPIO
 import time
+import pyfingerprint.pyfingerprint as FPF
 
 # Mock functions to replace hardware-specific functions
 
@@ -78,7 +80,8 @@ def create_main_window():
 def charge_phone_window():
     layout = [
         [sg.Text('Enter Your FingerPrint Here', font=('Helvetica', 20), justification='center', size=(30, 1))],
-        [sg.Image('images.png', size=(200, 200),enable_events=True,key='-IMAGE-')],
+        # [sg.Image('images.png', size=(200, 200),enable_events=True,key='-IMAGE-')],
+        [sg.Output(size=(30, 10))],
         [sg.Text('PLACEHOLDER', key='status_text', justification='center', size=(30, 1))]
     ]
     return sg.Window('Enter Your FingerPrint Here', layout, element_justification='center')
@@ -107,20 +110,16 @@ def main():
     window = create_main_window()
     while True:
         event, values = window.read()
-        print("Hello World")
         if event == sg.WIN_CLOSED:
             break
         
-
         elif event == "charge_phone":
             charge_window = charge_phone_window()
             while True:
                 event, values = charge_window.read()
                 if event == sg.WIN_CLOSED:
                     break
-
-                
-                if event == '-IMAGE-':
+                else:
                     available_container = 0  # Mock available container
                     if available_container is None:
                         sg.popup("No available container.")
@@ -129,7 +128,7 @@ def main():
                     id = available_container + 1
 
                     charge_window['status_text'].update('Please place your finger...')
-                    charge_window.refresh()
+                    # charge_window.refresh()
                     print("Hello Nishara")
                 
                     result = enroll_fingerprint(f, id, charge_window, 'status_text')
@@ -141,24 +140,24 @@ def main():
             charge_window.close()    
 
 
-            face_capture_window = face_image_capture_window()
-            while True:
+            # face_capture_window = face_image_capture_window()
+            # while True:
                     
-                    event, values = face_capture_window.read()
-                    if event == sg.WIN_CLOSED:
-                        break
+            #         event, values = face_capture_window.read()
+            #         if event == sg.WIN_CLOSED:
+            #             break
 
-                    # Implement image capture and storage here
-                    if event == '-TAKE IMAGE-':
-                        if available_container is not None:
-                            unlock_locker(available_container)
-                            sg.popup("Phone is now charging.")
+            #         # Implement image capture and storage here
+            #         if event == '-TAKE IMAGE-':
+            #             if available_container is not None:
+            #                 unlock_locker(available_container)
+            #                 sg.popup("Phone is now charging.")
                             
-                        else:
-                            sg.popup("No available container.")
+            #             else:
+            #                 sg.popup("No available container.")
 
-                    print("close")
-                    face_capture_window.close()
+            #         print("close")
+            #         face_capture_window.close()
                     
 
             

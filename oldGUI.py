@@ -11,12 +11,13 @@ sensor_path = '/dev/ttyS0'
 baud_rate = 57600
 
 # File paths for images
-want_to_charge_img = "/home/sdam/Documents/gui/image/want_to_charge_img.png"
-safe_charging_img = "/home/sdam/Documents/gui/image/safe_charging_img.png"
-getoutf_image =  "/home/sdam/Documents/gui/image/1.png"
-readingf_image = "/home/sdam/Documents/gui/image/readingf_image.png"
-enrollf_error_image = "/home/sdam/Documents/gui/image/enrollf_error_image.png"
-thumbs_up_img = "/home/sdam/Documents/gui/image/thumbs_up_img.png"
+want_to_charge_img = "/home/sdams/Documents/gui/image/want_to_charge_img.png"
+safe_charging_img = "/home/sdams/Documents/gui/image/safe_charging_img.png"
+getoutf_image =  "/home/sdams/Documents/gui/image/1.png"
+readingf_image = "/home/sdams/Documents/gui/image/readingf_image.png"
+enrollf_error_image = "/home/sdams/Documents/gui/image/enrollf_error_image.png"
+thumbs_up_img = "/home/sdams/Documents/gui/image/thumbs_up_img.png"
+# "/home/sdams/Documents/gui/image/enrollf_error_image.png"
 
 # GPIO setup
 GPIO.setmode(GPIO.BCM)
