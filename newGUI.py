@@ -47,6 +47,10 @@ getoutf_image = '/home/sdam/hw_project/images/getoutf_image.png'
 sensor_path = '/dev/ttyS0'
 baud_rate = 57600
 
+# Initialize the camera
+camera = PiCamera()
+camera.resolution = (320, 240)
+
 # GPIO setup
 GPIO.setmode(GPIO.BCM)
 solenoid_pins = [17, 27, 22, 23]  # GPIO pins for 4 solenoid locks
@@ -73,9 +77,7 @@ def initialize_sensor():
         print('Exception message: ' + str(e))
         return None
     
-# Initialize the camera
-camera = PiCamera()
-camera.resolution = (320, 240)
+
 
 # Function to initialize GUI
 def create_main_window():
@@ -107,6 +109,7 @@ def unlock_container_window():
 def face_image_capture_window():
     layout = [
     [sg.Text('Capture Your Face Image', font=('Helvetica', 15), justification='center', size=(200, 2))],
+    
     [sg.Image(filename='', key='image')],
     [sg.Button('Take Photo', key='-TAKE_PHOTO-')]
             ]
@@ -299,7 +302,7 @@ def main():
 
                         
 
-            face_image_capture = face_image_capture_window() #need to create
+            face_image_capture = face_image_capture_window()
             while True:
                 event, values = face_image_capture.read()
                 if event == sg.WIN_CLOSED:
@@ -317,7 +320,7 @@ def main():
 
                 if event == '-TAKE_PHOTO-':
                     # Get the current frame from the camera
-                    image = get_image_from_camera(camera)
+                    # image = get_image_from_camera(camera)
                     # Upload the image to Firebase
                     # upload_image_to_firebase(image)
                     sg.popup('Photo taken and uploaded to Firebase!')
