@@ -281,10 +281,10 @@ def main():
                 # Check for available container using IR sensors
                 if event == 'image':
                     available_container = 0
-                    # for idx, pin in enumerate(ir_sensor_pins):
-                    #     if GPIO.input(pin) == GPIO.LOW:  # Assuming LOW means container is empty
-                    #         available_container = idx
-                    #         break
+                    for idx, pin in enumerate(ir_sensor_pins):
+                        if GPIO.input(pin) == GPIO.LOW:  # Assuming LOW means container is empty
+                            available_container = idx
+                            break
 
                     #write code for if no available box
                     id = available_container + 1
