@@ -17,6 +17,15 @@ GPIO.setmode(GPIO.BCM)
 solenoid_pins = [17, 27, 22, 23]  # GPIO pins for 4 solenoid locks
 ir_sensor_pins = [6, 13, 19, 26] # GPIO pins for the IR sensors
 
+
+# Set solenoid pins as output and IR sensor pins as input
+for pin in solenoid_pins:
+    GPIO.setup(pin, GPIO.OUT)
+
+for pin in ir_sensor_pins:
+    GPIO.setup(pin, GPIO.IN)
+
+
 #Imamges
 enrollf_error_image = '/home/sdam/hw_project/images/enrollf_error_image.png'
 readingf_image =  "/home/sdam/hwproject/image/eadingf_image.png"  
@@ -34,8 +43,6 @@ locker_image = "/home/sdam/hwproject/image/locker.png"
 # thumbs_up_img = "D:\L1S2\INteligent machine Inspiration Project - CM1900\GUI\gui_with_chathuranga\Hardwear_project\image\humsup.png"
 # locker_image = "D:\L1S2\INteligent machine Inspiration Project - CM1900\GUI\gui_with_chathuranga\Hardwear_project\image\locker.png"
 
-# Initialize List for lockers
-lokers = ['Empty', 'Empty', 'Empty', 'Empty']  # Example GPIO pins for 4 solenoid locks
 
 def initialize_sensor():
     try:
@@ -82,12 +89,12 @@ def enroll_fingerprint(f, id, window, status_key):
         return False
 
     print('Remove finger...')
-    #window['instruction_image'].update(filename=getoutf_image)
+    window['instruction_image'].update(filename=getoutf_image)
     window[status_key].update('Remove finger...')
     time.sleep(1)
 
     print('Place same finger again...')
-    #window['instruction_image'].update(filename=readingf_image)
+    window['instruction_image'].update(filename=readingf_image)
     window[status_key].update('Place same finger again...')
     while not f.readImage():
         pass
@@ -145,7 +152,7 @@ def charge_phone_window():
     layout = [
     [sg.Text('Do you want to charge your phone with safety?')],
     [sg.Image(filename=instruction_image,key='instruction_image')],  # Replace with your actual image path
-    [sg.Text('', size=(30, 1), font=('Helvetica', 20), justification='center', key='status_text')],
+    [sg.Text('Instruction......', font=('Helvetica', 20), justification='center', key='status_text')],
     [sg.Button('Enroll Your Finger.',expand_x=True,expand_y=True,pad=(30,30)), sg.Button('Exit',expand_x=True,expand_y=True,pad=(30,30))]
                     ]   
     return sg.Window('Enter Your FingerPrint Here', layout, element_justification='center',size=(800, 400), finalize=True)
@@ -165,6 +172,11 @@ def face_image_capture_window():
     
 
 def main():
+
+    # Initialize List for lockers
+    lockers = ['Empty', 'Empty', 'Empty', 'Empty']  # Example GPIO pins for 4 solenoid locks
+
+
     # Initialize fingerprint sensor
     f = initialize_sensor()
     if not f:
@@ -187,7 +199,7 @@ def main():
                     #         available_container = idx
                     #         break
                     available_container = 0
-                    for idx, locker in enumerate(lokers):
+                    for idx in lokers:
                         if locker == 'Empty':
                             available_container = idx
                             print(available_container)
@@ -195,10 +207,10 @@ def main():
                     id = available_container + 1
                     charge_window['status_text'].update('Please place your finger...')
                     charge_window['instruction_image'].update(filename=readingf_image)
+                    charge_window.Refresh()
                     # want to uncomment this for the fingerprint sensor
-                    if enroll_fingerprint(f, id, charge_window, 'status_text'):
-                    #     lock_locker(locker_id)
-                         locker[available_container] = 'charging'
+                    enroll_fingerprint(f, id, charge_window, 'status_text')
+
                     face_image_capture = face_image_capture_window()
                     while True:
                         event, values = face_image_capture.read()
@@ -218,15 +230,12 @@ def main():
                     face_image_capture.close()
 
                     # # Unlock the container based on the id
-                    GPIO.output(solenoid_pins[available_container], GPIO.HIGH)
-                    sg.popup('Now the locker is activated, enter your mobile phone and close the door after that press the OK button.', image=locker_image)
                     GPIO.output(solenoid_pins[available_container], GPIO.LOW)
+                    sg.popup('Now the locker is activated, enter your mobile phone and close the door after that press the OK button.', image=locker_image)
+                    GPIO.output(solenoid_pins[available_container], GPIO.HIGH)
+                    lockers[available_container] = 'charging'
                     break
                 
-
-                    # Unlock the container based on the id
-                    # Assuming you have a function called unlock_container that takes the id as an argument
-                    # unlock_container(id)
                 elif event == "Exit":
                     charge_window.close()
                     break

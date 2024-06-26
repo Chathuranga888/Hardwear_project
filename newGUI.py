@@ -56,12 +56,12 @@ GPIO.setmode(GPIO.BCM)
 solenoid_pins = [17, 27, 22, 23]  # GPIO pins for 4 solenoid locks
 ir_sensor_pins = [6, 13, 19, 26] # GPIO pins for the IR sensors
 
-# Set solenoid pins as output and IR sensor pins as input
-# for pin in solenoid_pins:
-#     GPIO.setup(pin, GPIO.OUT)
+Set solenoid pins as output and IR sensor pins as input
+for pin in solenoid_pins:
+    GPIO.setup(pin, GPIO.OUT)
 
-# for pin in ir_sensor_pins:
-#     GPIO.setup(pin, GPIO.IN)
+for pin in ir_sensor_pins:
+    GPIO.setup(pin, GPIO.IN)
 
 
 def initialize_sensor():

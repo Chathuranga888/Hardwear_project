@@ -28,15 +28,15 @@ if GPIO:
     ir_sensor_pins = [6, 13, 19, 26]  # GPIO pins for the IR sensors
 
 # Image paths
-enrollf_error_image = 'path/to/enrollf_error_image.png'
-readingf_image = "path/to/readingf_image.png"
-getoutf_image = 'path/to/getoutf_image.png'
-instruction_image = "path/to/want_to_charge_img.png"
-smile_face_image = "path/to/smile.png"
-thumbs_up_img = "path/to/thumbsup.png"
-locker_image = "path/to/locker.png"
-charge_complete_image = "path/to/phone_charge_complete.png"
-fingerprint_error_image = "path/to/fingerprint_error_image.png"
+enrollf_error_image = "D:\L1S2\INteligent machine Inspiration Project - CM1900\GUI\gui_with_chathuranga\Hardwear_project\image\enrollf_error_image.png"
+readingf_image =    "D:\L1S2\INteligent machine Inspiration Project - CM1900\GUI\gui_with_chathuranga\Hardwear_project\image\eadingf_image.png"
+getoutf_image = '/home/sdam/hw_project/images/getoutf_image.png'
+instruction_image = "D:\L1S2\INteligent machine Inspiration Project - CM1900\GUI\gui_with_chathuranga\Hardwear_project\image\want_to_charge_img.png"
+smile_face_image = "D:\L1S2\INteligent machine Inspiration Project - CM1900\GUI\gui_with_chathuranga\Hardwear_project\image\smile.png"
+thumbs_up_img = "D:\L1S2\INteligent machine Inspiration Project - CM1900\GUI\gui_with_chathuranga\Hardwear_project\image\humsup.png"
+locker_image = "D:\L1S2\INteligent machine Inspiration Project - CM1900\GUI\gui_with_chathuranga\Hardwear_project\image\locker.png"
+charge_complete_image = "D:\L1S2\INteligent machine Inspiration Project - CM1900\GUI\gui_with_chathuranga\Hardwear_project\image\phone_charge_complete.png"
+fingerprint_error_image = "D:\L1S2\INteligent machine Inspiration Project - CM1900\GUI\gui_with_chathuranga\Hardwear_project\image\enrollf_error_image.png"
 
 # Initialize List for lockers
 lockers = ['Empty', 'Empty', 'Empty', 'Empty']  # Example for 4 solenoid locks

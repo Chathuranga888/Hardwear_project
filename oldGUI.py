@@ -147,7 +147,7 @@ def create_locking_window():
     layout = [
         [sg.Text('Do you want to charge your phone with safety?', font=('Helvetica', 15), justification='center', size=(200, 2))],
         [sg.Image(filename=want_to_charge_img, key='instruction_image', size=(400, 200), expand_x=True, expand_y=True)],  # Replace with your actual image path
-        [sg.Output(size=(100, 3))],
+        [sg.Output(size=(100, 3),scroll=false)],
         [sg.Text('Status Text', key='status_text')],
         [sg.Button('Charge My Phone', size=(15, 3)), sg.Button('Exit', size=(15, 3))]
     ]
